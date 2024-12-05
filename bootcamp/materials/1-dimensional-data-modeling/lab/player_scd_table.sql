@@ -1,4 +1,5 @@
 -- for scd incremental
+-- control types of values from unnested array?
 CREATE TYPE scd_type AS (
                     scoring_class scoring_class,
                     is_active boolean,
