@@ -21,9 +21,9 @@ select
         WHEN t.date_active is Null Then y.device_activity_datelist
         ELSE ARRAY[t.date_active] || y.device_activity_datelist
     END as device_activity_datelist,
-    COALESCE(t.date_active, y.date + Interval '1 day') as date
+    COALESCE(t.date_active, y.date + Interval '1 day') asrecorded_date
 from today t
-full outer join yesterday y on t.device_id = y.device_id;
+full outer join yesterday y on t.device_id = y.device_id and t.browser_type = y.browser_type;
 
 select *
 from user_devices_cumulated

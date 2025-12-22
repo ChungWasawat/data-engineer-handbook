@@ -2,8 +2,8 @@ create table user_devices_cumulated(
     device_id NUMERIC,
     browser_type TEXT,
     device_activity_datelist DATE[],
-    date DATE, 
-    primary key (device_id, browser_type, date)
+    recorded_date DATE, 
+    primary key (device_id, browser_type, recorded_date)
 )
 
 delete from user_devices_cumulated
