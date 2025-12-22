@@ -1,5 +1,8 @@
 from pyspark.sql import SparkSession
 
+# window function requires order by in spark
+# in map(), spark treats it as a struct so have to cast year to be string like other columns
+
 query = """
 
 WITH teams_deduped AS (
@@ -23,11 +26,14 @@ WHERE row_num = 1
 
 
 def do_team_vertex_transformation(spark, dataframe):
+    """create temp view to use spark sql"""
+    # to test the query
     dataframe.createOrReplaceTempView("teams")
     return spark.sql(query)
 
 
 def main():
+    """for code execution"""
     spark = SparkSession.builder \
         .master("local") \
         .appName("players_scd") \

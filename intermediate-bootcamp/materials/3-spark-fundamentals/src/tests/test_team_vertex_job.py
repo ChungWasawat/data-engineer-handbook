@@ -1,3 +1,11 @@
+import socketserver
+import platform
+
+if platform.system() == "Windows":
+    # We "fake" the UnixStreamServer by pointing it to the TCP version
+    socketserver.UnixStreamServer = socketserver.TCPServer
+    socketserver.UnixDatagramServer = socketserver.UDPServer
+
 from chispa.dataframe_comparer import *
 
 from ..jobs.team_vertex_job import do_team_vertex_transformation
@@ -5,6 +13,7 @@ from collections import namedtuple
 
 TeamVertex = namedtuple("TeamVertex", "identifier type properties")
 Team = namedtuple("Team", "team_id abbreviation nickname city arena yearfounded")
+
 
 
 def test_vertex_generation(spark):
@@ -29,4 +38,5 @@ def test_vertex_generation(spark):
         )
     ]
     expected_df = spark.createDataFrame(expected_output)
+    # nullable value (last boolean of output's type) has to be ignored as the expected output will set it as True while actual is False 
     assert_df_equality(actual_df, expected_df, ignore_nullable=True)

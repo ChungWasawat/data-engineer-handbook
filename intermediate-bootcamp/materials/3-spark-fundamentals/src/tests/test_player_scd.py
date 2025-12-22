@@ -1,10 +1,18 @@
+import socketserver
+import platform
+
+if platform.system() == "Windows":
+    # We "fake" the UnixStreamServer by pointing it to the TCP version
+    socketserver.UnixStreamServer = socketserver.TCPServer
+    socketserver.UnixDatagramServer = socketserver.UDPServer
+
 from chispa.dataframe_comparer import *
 from ..jobs.players_scd_job import do_player_scd_transformation
 from collections import namedtuple
 PlayerSeason = namedtuple("PlayerSeason", "player_name current_season scoring_class")
 PlayerScd = namedtuple("PlayerScd", "player_name scoring_class start_date end_date")
 
-
+# fake data to test
 def test_scd_generation(spark):
     source_data = [
         PlayerSeason("Michael Jordan", 2001, 'Good'),

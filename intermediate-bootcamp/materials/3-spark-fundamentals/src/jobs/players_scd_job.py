@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 
+
 query = """
 
 WITH streak_started AS (

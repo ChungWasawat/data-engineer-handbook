@@ -1,7 +1,17 @@
-from chispa.dataframe_comparer import *
+import socketserver
+import platform
 
+if platform.system() == "Windows":
+    # We "fake" the UnixStreamServer by pointing it to the TCP version
+    socketserver.UnixStreamServer = socketserver.TCPServer
+    socketserver.UnixDatagramServer = socketserver.UDPServer
+
+from chispa.dataframe_comparer import *
 from ..jobs.monthly_user_site_hits_job import do_monthly_user_site_hits_transformation
 from collections import namedtuple
+
+
+
 
 MonthlySiteHit = namedtuple("MonthlySiteHit",  "month_start hit_array date_partition")
 MonthlySiteHitsAgg = namedtuple("MonthlySiteHitsAgg",  "month_start num_hits_first_day num_hits_second_day num_hits_third_day")
