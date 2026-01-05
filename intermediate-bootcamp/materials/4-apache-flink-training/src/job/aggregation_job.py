@@ -49,7 +49,8 @@ def create_processed_events_source_kafka(t_env):
     kafka_key = os.environ.get("KAFKA_WEB_TRAFFIC_KEY", "")
     kafka_secret = os.environ.get("KAFKA_WEB_TRAFFIC_SECRET", "")
     table_name = "process_events_kafka"
-    pattern = "yyyy-MM-dd''T''HH:mm:ss.SSS''Z''"
+    pattern = "yyyy-MM-dd HH:mm:ss"
+    # window_timestamp here need to be the same with the tumble below
     sink_ddl = f"""
         CREATE TABLE {table_name} (
             ip VARCHAR,
@@ -81,7 +82,8 @@ def log_aggregation():
     # Set up the execution environment
     env = StreamExecutionEnvironment.get_execution_environment()
     env.enable_checkpointing(10)
-    env.set_parallelism(3)
+    env.set_parallelism(3)  # if we know how many group are there, parallelsim the right number of group should make process faster
+    # 1 task = 3 worker, 2 task = 6 worker
 
     # Set up the table environment
     settings = EnvironmentSettings.new_instance().in_streaming_mode().build()
@@ -93,6 +95,8 @@ def log_aggregation():
 
         aggregated_table = create_aggregated_events_sink_postgres(t_env)
         aggregated_sink_table = create_aggregated_events_referrer_sink_postgres(t_env)
+        
+        # call source_table = 1 task, call aggregated_table = 1 task, total = 2 tasks * 3 workers = 6 workers
         t_env.from_path(source_table)\
             .window(
             Tumble.over(lit(5).minutes).on(col("window_timestamp")).alias("w")
@@ -107,6 +111,7 @@ def log_aggregation():
             ) \
             .execute_insert(aggregated_table)
 
+        # tumble window(fixed size): 5 min -> create window based on group-by keys -> select and process what to insert
         t_env.from_path(source_table).window(
             Tumble.over(lit(5).minutes).on(col("window_timestamp")).alias("w")
         ).group_by(

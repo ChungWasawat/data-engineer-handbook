@@ -9,6 +9,32 @@ API_KEY = os.environ.get('STATSIG_API_KEY')
 statsig.initialize(API_KEY)
 app = Flask(__name__)
 
+# statsig setup
+"""
+    experiment tab > create > set name and null hypothesis > use id type 
+
+    scorecard 
+    1. edit null hypothesis
+    2. choose primary metric (set by statsig) 
+    
+    group and parameters
+    1. users
+    1.1 set percentage of users to use in test
+    1.2 distribute user to every test group
+    1.3 set test parameters like name, value
+    2. pulse result
+    2.1 get result from the experiment
+
+    pulse result
+    1. show charts of events
+    2. metric lift: summarize metrics included p value/ confidence interval
+    
+    features gate
+    1. yes/ no -2 option because it has no group
+"""
+
+
+
 # Sample in-memory database
 tasks = [
     {
@@ -39,6 +65,7 @@ def signup():
         hash_string = str(random.randint(0, 1000000))
     user_id = str(hash(hash_string))
     statsig_user = StatsigUser(user_id)
+    # logged as an existing metric
     statsig_event = StatsigEvent(
         user=statsig_user,
         event_name='visited_signup'
@@ -50,12 +77,16 @@ def signup():
 @app.route('/tasks', methods=['GET'])
 def get_tasks():
     random_num = request.args.get('random')
+    # hash IP address
     hash_string = request.remote_addr
+    # add randomness to the hash for complexity of hashing or what test group user will be  
     if random_num:
         hash_string = str(random.randint(0, 1000000))
     user_id = str(hash(hash_string))
+    # get these values from what it's set on Statsig
     color = statsig.get_experiment(StatsigUser(user_id), "button_color_v3").get("Button Color", "blue")
     paragraph_text = statsig.get_experiment(StatsigUser(user_id), "button_color_v3").get("Paragraph Text", "Data Engineering Boot Camp")
+
     experiment_description = 'odd tasks for blue and green, even for red and orange'
     filtered_tasks = ''.join(map(lambda a: f"""
             <tr>

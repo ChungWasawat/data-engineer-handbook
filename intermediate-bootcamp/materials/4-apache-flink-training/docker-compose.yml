@@ -50,5 +50,5 @@ services:
       - |
         FLINK_PROPERTIES=
         jobmanager.rpc.address: jobmanager
-        taskmanager.numberOfTaskSlots: 15
+        taskmanager.numberOfTaskSlots: 15   # create slots more than a number of works (parallelism)
         parallelism.default: 3
